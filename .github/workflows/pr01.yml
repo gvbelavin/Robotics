@@ -1,6 +1,14 @@
 name: PR01 — проверка отчёта
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'evidence/pr01/**'
+      - '.github/workflows/pr01.yml'
+  pull_request:
+    paths:
+      - 'evidence/pr01/**'
+      - '.github/workflows/pr01.yml'
 
 jobs:
   evidence:
