@@ -1,0 +1,7 @@
+[INFO] [launch]: All log files can be found below /home/gleb/.ros/log/2026-10-10-22-18-49-748010-gleb-MCLG-XX-95982
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [turtlesim_node-1]: process started with pid [96033]
+[turtlesim_node-1] [INFO] [1791645530.103266423] [turtlesim]: Starting turtlesim with node name /turtlesim
+[turtlesim_node-1] [INFO] [1791645530.113169417] [turtlesim]: Spawning turtle [turtle1] at x=[5.544445], y=[5.544445], theta=[0.000000]
+[turtlesim_node-1] [INFO] [1791645595.524402514] [rclcpp]: signal_handler(signum=2)
+[INFO] [turtlesim_node-1]: process has finished cleanly [pid 96033]

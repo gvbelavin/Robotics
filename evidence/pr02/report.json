@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "practice_id": "PR02",
+  "commit": "b37fd3c125795b123f5e4000af549c1e55e1eaee",
+  "course_kit": {
+    "version": "v1-w05",
+    "archive_sha256": "bca214e3de6f90f9513049dfa0f36fee65ad834da502dc3f3f8fb443517b5197"
+  },
+  "commands": [
+    "pwd",
+    "ls -a",
+    "mkdir -p src evidence/pr02",
+    "printenv ROS_DISTRO ROS_DOMAIN_ID",
+    "ros2 pkg prefix turtlesim",
+    "ros2 pkg create --build-type ament_python --license Apache-2.0 turtle_bringup --dependencies launch launch_ros turtlesim",
+    "colcon build --symlink-install --packages-select turtle_bringup",
+    "source install/setup.bash",
+    "ros2 pkg prefix turtle_bringup",
+    "ros2 launch turtle_bringup sim.launch.py",
+    "ros2 node list --no-daemon --spin-time 2",
+    "ros2 interface show geometry_msgs/msg/Twist",
+    "ros2 topic type /turtle1/pose",
+    "ros2 topic echo /turtle1/pose --once",
+    "ros2 topic pub --once /turtle1/cmd_vel geometry_msgs/msg/Twist '{linear: {x: 1.0}, angular: {z: 0.5}}'",
+    "ros2 topic pub --rate 1 --wait-matching-subscriptions 0 /cmd_vel geometry_msgs/msg/Twist '{linear: {x: 1.0}, angular: {z: 0.5}}'",
+    "ros2 topic info /cmd_vel --verbose",
+    "ros2 topic info /turtle1/cmd_vel --verbose",
+    "ros2 topic pub --rate 1 --wait-matching-subscriptions 0 /turtle1/cmd_vel geometry_msgs/msg/Twist '{linear: {x: 1.0}, angular: {z: 0.5}}'",
+    "python3 -m py_compile src/turtle_bringup/launch/sim.launch.py",
+    "python3 .course-kit/v1/tools/check_practice.py PR02 --submission ."
+  ],
+  "tests": [
+    {
+      "name": "Пустой turtle_bringup собрался без launch",
+      "status": "passed",
+      "evidence": "build-empty.txt"
+    },
+    {
+      "name": "Итоговая сборка установила sim.launch.py в share пакета",
+      "status": "passed",
+      "evidence": "build.txt"
+    },
+    {
+      "name": "ros2 launch поднял /turtlesim, SIGINT завершил процесс",
+      "status": "passed",
+      "evidence": "launch-first.txt, nodes-running.txt, nodes-after-stop.txt"
+    },
+    {
+      "name": "Одна публикация в /turtle1/cmd_vel сдвинула x с 5.544445 до 6.509309 и остановила черепаху",
+      "status": "passed",
+      "evidence": "pose-before.txt, pose-after-once.txt"
+    },
+    {
+      "name": "Тот же Twist в /cmd_vel: издатель есть, подписчиков 0, поза не изменилась",
+      "status": "passed",
+      "evidence": "info-cmd-vel-broken.txt, pose-during-broken.txt"
+    },
+    {
+      "name": "После замены только имени топика turtlesim получил скорость 1.0 и 0.5",
+      "status": "passed",
+      "evidence": "info-turtle-cmd-fixed.txt, pose-during-fixed.txt, pose-after-publisher-stop.txt"
+    }
+  ],
+  "defect": {
+    "reproducer": "При запущенном turtlesim тот же Twist публиковался с --rate 1 в /cmd_vel. ros2 topic info /cmd_vel --verbose показал Publisher count 1 и Subscription count 0. Поза осталась x=6.509308815002441, y=5.796990871429443, theta=0.5040000081062317.",
+    "root_cause": "Тип geometry_msgs/msg/Twist совпал, но доставка идёт по полному имени топика. turtlesim подписан на /turtle1/cmd_vel. Издатель /cmd_vel был обнаружен в графе и не имел подписчика, поэтому сообщение до ноды не дошло.",
+    "proof_after": "Изменено только имя на /turtle1/cmd_vel; скорость, тип и ROS_DOMAIN_ID=16 те же. Подписчик один: нода turtlesim. Поза стала x=6.49107027053833, y=9.30190658569336, theta=2.640000104904175, linear_velocity=1.0, angular_velocity=0.5. После остановки издателя скорости вернулись к 0."
+  },
+  "claims": {
+    "public_tests_passed": true,
+    "defect_reproduced": true,
+    "defect_fixed": true
+  },
+  "time": {
+    "contact_academic_hours": 2,
+    "self_study_hours": 2
+  },
+  "time_note": "Оценка из условия: одна лабораторная пара и около двух часов самостоятельной доработки.",
+  "ai_used": true,
+  "recorded_at_utc": "2026-10-10T15:25:00+00:00"
+}
