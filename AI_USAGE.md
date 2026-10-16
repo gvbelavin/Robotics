@@ -34,3 +34,12 @@
 - Затронутые компоненты: параметры ноды `src/patrol`, `src/patrol/test/test_parameters.py`, `.github/workflows/pr04.yml`, `README.md`, `evidence/pr04/`, этот файл
 - Характер помощи: чистая проверка трёх параметров, смена одного таймера, тесты отказа, workflow и черновик `parameters.md` с `report.json` по выводу локального запуска
 - Проверка: `colcon build` и `python3 -m pytest src/patrol/test` выполнены локально в ROS 2 Lyrical, 16 passed, 1 skipped. Частоты `ros2 topic hz`, отказ `publish_hz 0.0`, traceback `ZeroDivisionError`, поза, `/clear` и `ros2 action list -t` сняты с turtlesim и patrol в домене 16 и лежат в `evidence/pr04`. Числа в отчёте не подставлены вместо симулятора.
+
+## PR05
+
+- Использован ИИ: да
+- Модель: Grok 4.7
+- Инструмент: Cursor
+- Затронутые компоненты: пакет `src/course_bringup`, относительное имя позы в `src/patrol`, `config/qos-overrides.yaml`, `.github/workflows/pr05.yml`, `README.md`, `evidence/pr05/`, этот файл
+- Характер помощи: launch с аргументами, namespace и условной записью MCAP, ноды pose_relay и pose_subscriber, тесты QoS и завершения launch, workflow и черновик `report.json` по выводу локального запуска
+- Проверка: `colcon build` и `colcon test --packages-select patrol course_bringup` выполнены локально в ROS 2 Lyrical: 30 tests, 0 errors, 0 failures, 2 skipped. Несовместимость reliable против best effort, поза после смены профиля, `ros2 bag info` на 1642 сообщения и оба echo при повторе той же записи сняты с turtlesim в домене 16 и лежат в `evidence/pr05`. Числа в отчёте не подставлены вместо симулятора.

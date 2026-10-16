@@ -1,0 +1,6 @@
+patrol: 16 passed, 1 skipped in 11.42s
+course_bringup: 12 passed, 1 skipped in 17.45s
+Summary: 30 tests, 0 errors, 0 failures, 2 skipped
+
+course_bringup включает test_qos, test_launch_description и test_launch_shutdown.
+Пропущены только test_copyright в обоих пакетах.

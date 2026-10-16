@@ -1,0 +1,156 @@
+$ ros2 node list --no-daemon --spin-time 2
+/robot_a/patrol
+/robot_a/pose_relay
+/robot_a/pose_subscriber
+/rosbag2_recorder
+/turtlesim
+
+$ ros2 topic list --no-daemon --spin-time 2
+/events/rosbag2_messages_lost
+/events/write_split
+/parameter_events
+/robot_a/sensor_pose
+/rosout
+/turtle1/cmd_vel
+/turtle1/color_sensor
+/turtle1/pose
+
+$ ros2 param get /robot_a/pose_subscriber reliability --no-daemon --spin-time 2
+String value is: best_effort
+
+$ ros2 topic info /robot_a/sensor_pose --verbose --no-daemon --spin-time 2
+Type: turtlesim_msgs/msg/Pose
+
+Publisher count: 1
+
+Node name: pose_relay
+Node namespace: /robot_a
+Topic type: turtlesim_msgs/msg/Pose
+Topic type hash: RIHS01_37b07ace09a0ed2c5b774b1410dec972dfd1d292de5656ebc2b075ac646e09c8
+Endpoint type: PUBLISHER
+GID: 01.0f.37.ee.bc.90.9a.28.00.00.00.00.00.00.14.03
+QoS profile:
+  Reliability: BEST_EFFORT
+  History (Depth): KEEP_LAST (10)
+  Durability: VOLATILE
+  Lifespan: Infinite
+  Deadline: Infinite
+  Liveliness: AUTOMATIC
+  Liveliness lease duration: Infinite
+
+Subscription count: 2
+
+Node name: pose_subscriber
+Node namespace: /robot_a
+Topic type: turtlesim_msgs/msg/Pose
+Topic type hash: RIHS01_37b07ace09a0ed2c5b774b1410dec972dfd1d292de5656ebc2b075ac646e09c8
+Endpoint type: SUBSCRIPTION
+GID: 01.0f.37.ee.bd.90.c7.c5.00.00.00.00.00.00.13.04
+QoS profile:
+  Reliability: BEST_EFFORT
+  History (Depth): KEEP_LAST (10)
+  Durability: VOLATILE
+  Lifespan: Infinite
+  Deadline: Infinite
+  Liveliness: AUTOMATIC
+  Liveliness lease duration: Infinite
+
+Node name: rosbag2_recorder
+Node namespace: /
+Topic type: turtlesim_msgs/msg/Pose
+Topic type hash: RIHS01_37b07ace09a0ed2c5b774b1410dec972dfd1d292de5656ebc2b075ac646e09c8
+Endpoint type: SUBSCRIPTION
+GID: 01.0f.37.ee.be.90.f7.7c.00.00.00.00.00.00.26.04
+QoS profile:
+  Reliability: BEST_EFFORT
+  History (Depth): KEEP_LAST (10)
+  Durability: VOLATILE
+  Lifespan: Infinite
+  Deadline: Infinite
+  Liveliness: AUTOMATIC
+  Liveliness lease duration: Infinite
+
+
+$ ros2 topic info /turtle1/cmd_vel --verbose --no-daemon --spin-time 2
+Type: geometry_msgs/msg/Twist
+
+Publisher count: 1
+
+Node name: patrol
+Node namespace: /robot_a
+Topic type: geometry_msgs/msg/Twist
+Topic type hash: RIHS01_9c45bf16fe0983d80e3cfe750d6835843d265a9a6c46bd2e609fcddde6fb8d2a
+Endpoint type: PUBLISHER
+GID: 01.0f.37.ee.bb.90.13.f0.00.00.00.00.00.00.14.03
+QoS profile:
+  Reliability: RELIABLE
+  History (Depth): KEEP_LAST (10)
+  Durability: VOLATILE
+  Lifespan: Infinite
+  Deadline: Infinite
+  Liveliness: AUTOMATIC
+  Liveliness lease duration: Infinite
+
+Subscription count: 1
+
+Node name: turtlesim
+Node namespace: /
+Topic type: geometry_msgs/msg/Twist
+Topic type hash: RIHS01_9c45bf16fe0983d80e3cfe750d6835843d265a9a6c46bd2e609fcddde6fb8d2a
+Endpoint type: SUBSCRIPTION
+GID: 01.0f.37.ee.ba.90.1d.36.00.00.00.00.00.00.1c.04
+QoS profile:
+  Reliability: RELIABLE
+  History (Depth): KEEP_LAST (7)
+  Durability: VOLATILE
+  Lifespan: Infinite
+  Deadline: Infinite
+  Liveliness: AUTOMATIC
+  Liveliness lease duration: Infinite
+
+
+$ timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability best_effort --once --no-daemon
+x: 7.206765651702881
+y: 7.245136260986328
+theta: 1.5888147354125977
+linear_velocity: 0.5
+angular_velocity: 0.30000001192092896
+---
+echo_exit=0
+
+$ rg namespace,reliability,subscribe /tmp/pr05-launch-best_effort.txt
+[INFO] [launch.user]: course_bringup namespace=robot_a record=true bag_dir=evidence/pr05/bag subscriber_reliability=best_effort
+[INFO] [ros2-5]: process details: cmd='ros2 bag record -s mcap -o evidence/pr05/bag --topics /robot_a/sensor_pose --disable-keyboard-controls --log-level info', cwd='None', custom_env?=True
+[pose_subscriber-4] [INFO] [1792131744.770376453] [robot_a.pose_subscriber]: reliability=best_effort topic=/robot_a/sensor_pose
+[pose_relay-3] [INFO] [1792131744.780225554] [robot_a.pose_relay]: subscribe /turtle1/pose, publish /robot_a/sensor_pose best_effort
+
+$ ros2 bag info evidence/pr05/bag
+
+Files:             0_bag_2026_10_16-13_22_25.mcap
+Bag size:          118.6 KiB
+Storage id:        mcap
+ROS Distro:        lyrical
+Duration:          26.575695517s
+Start:             Oct 16 2026 13:22:25.306676780 (1792131745.306676780)
+End:               Oct 16 2026 13:22:51.882372297 (1792131771.882372297)
+Messages:          1642
+Topic information: Topic: /robot_a/sensor_pose | Type: turtlesim_msgs/msg/Pose | Count: 1642 | Serialization Format: cdr
+Services:          0
+Service information: 
+Actions:           0
+Action information: 
+
+=== replay of the same bag ===
+$ ros2 bag play evidence/pr05/bag --qos-profile-overrides-path config/qos-overrides.yaml
+$ timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability best_effort --once --no-daemon
+x: 7.117185115814209
+y: 6.671041488647461
+theta: 1.2383999824523926
+linear_velocity: 0.5
+angular_velocity: 0.30000001192092896
+---
+replay_best_effort_exit=0
+
+$ timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability reliable --once --no-daemon
+[WARN] [1792131840.829715475] [_ros2cli_169212]: New publisher discovered on topic '/robot_a/sensor_pose', offering incompatible QoS. No messages will be received from it. Last incompatible policy: RELIABILITY
+replay_reliable_exit=124

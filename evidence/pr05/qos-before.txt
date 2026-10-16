@@ -1,0 +1,66 @@
+$ ros2 topic list --no-daemon --spin-time 2
+/parameter_events
+/robot_a/sensor_pose
+/rosout
+/turtle1/cmd_vel
+/turtle1/color_sensor
+/turtle1/pose
+
+$ ros2 node list --no-daemon --spin-time 2
+/robot_a/patrol
+/robot_a/pose_relay
+/turtlesim
+
+$ ros2 topic info /robot_a/sensor_pose --verbose --no-daemon --spin-time 2
+Type: turtlesim_msgs/msg/Pose
+
+Publisher count: 1
+
+Node name: pose_relay
+Node namespace: /robot_a
+Topic type: turtlesim_msgs/msg/Pose
+Topic type hash: RIHS01_37b07ace09a0ed2c5b774b1410dec972dfd1d292de5656ebc2b075ac646e09c8
+Endpoint type: PUBLISHER
+GID: 01.0f.37.ee.b9.89.50.a9.00.00.00.00.00.00.14.03
+QoS profile:
+  Reliability: BEST_EFFORT
+  History (Depth): KEEP_LAST (10)
+  Durability: VOLATILE
+  Lifespan: Infinite
+  Deadline: Infinite
+  Liveliness: AUTOMATIC
+  Liveliness lease duration: Infinite
+
+Subscription count: 1
+
+Node name: pose_subscriber
+Node namespace: /robot_a
+Topic type: turtlesim_msgs/msg/Pose
+Topic type hash: RIHS01_37b07ace09a0ed2c5b774b1410dec972dfd1d292de5656ebc2b075ac646e09c8
+Endpoint type: SUBSCRIPTION
+GID: 01.0f.37.ee.ba.89.a9.47.00.00.00.00.00.00.13.04
+QoS profile:
+  Reliability: RELIABLE
+  History (Depth): KEEP_LAST (10)
+  Durability: VOLATILE
+  Lifespan: Infinite
+  Deadline: Infinite
+  Liveliness: AUTOMATIC
+  Liveliness lease duration: Infinite
+
+
+$ ros2 param get /robot_a/pose_subscriber reliability --no-daemon --spin-time 2
+String value is: reliable
+
+$ timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability reliable --once --no-daemon
+[WARN] [1792131361.385045047] [_ros2cli_166698]: New publisher discovered on topic '/robot_a/sensor_pose', offering incompatible QoS. No messages will be received from it. Last incompatible policy: RELIABILITY
+!rclpy.ok()
+echo_exit=124
+
+$ rg subscribe,reliability,incompatible /tmp/pr05-launch-reliable.txt
+[INFO] [launch.user]: course_bringup namespace=robot_a record=false bag_dir=evidence/pr05/bag subscriber_reliability=reliable
+[pose_subscriber-4] [INFO] [1792131344.088695703] [robot_a.pose_subscriber]: reliability=reliable topic=/robot_a/sensor_pose
+[pose_relay-3] [INFO] [1792131344.165594926] [robot_a.pose_relay]: subscribe /turtle1/pose, publish /robot_a/sensor_pose best_effort
+[pose_relay-3] [WARN] [1792131344.166510077] [robot_a.pose_relay]: New subscription discovered on topic 'sensor_pose', requesting incompatible QoS. No messages will be sent to it. Last incompatible policy: RELIABILITY
+[pose_subscriber-4] [WARN] [1792131344.217172500] [robot_a.pose_subscriber]: New publisher discovered on topic 'sensor_pose', offering incompatible QoS. No messages will be received from it. Last incompatible policy: RELIABILITY
+[pose_relay-3] [WARN] [1792131361.370877582] [robot_a.pose_relay]: New subscription discovered on topic 'sensor_pose', requesting incompatible QoS. No messages will be sent to it. Last incompatible policy: RELIABILITY

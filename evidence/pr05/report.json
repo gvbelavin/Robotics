@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "practice_id": "PR05",
+  "commit": "726189ea64007eccd41d886fc2004c94ed1217ca",
+  "course_kit": {
+    "version": "v1-w06",
+    "archive_sha256": "6eda53e1c566f7f0a7e09d7afe1e5a6f3b98397175a7e57dede9a84c6d14d0fe"
+  },
+  "commands": [
+    "colcon build --symlink-install --packages-select patrol course_bringup",
+    "source install/setup.bash",
+    "export ROS_DOMAIN_ID=16",
+    "export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST",
+    "colcon test --packages-select patrol course_bringup",
+    "colcon test-result --verbose",
+    "ros2 launch course_bringup patrol.launch.py namespace:=robot_a subscriber_reliability:=reliable record:=false bag_dir:=evidence/pr05/bag",
+    "ros2 topic list --no-daemon --spin-time 2",
+    "ros2 node list --no-daemon --spin-time 2",
+    "ros2 topic info /robot_a/sensor_pose --verbose --no-daemon --spin-time 2",
+    "ros2 param get /robot_a/pose_subscriber reliability --no-daemon --spin-time 2",
+    "timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability reliable --once --no-daemon",
+    "ros2 launch course_bringup patrol.launch.py namespace:=robot_a subscriber_reliability:=best_effort record:=true bag_dir:=evidence/pr05/bag",
+    "timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability best_effort --once --no-daemon",
+    "ros2 topic info /turtle1/cmd_vel --verbose --no-daemon --spin-time 2",
+    "ros2 bag info evidence/pr05/bag",
+    "cp evidence/pr05/bag/metadata.yaml evidence/pr05/bag-metadata.yaml",
+    "ros2 bag play evidence/pr05/bag --qos-profile-overrides-path config/qos-overrides.yaml",
+    "timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability best_effort --once --no-daemon",
+    "timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability reliable --once --no-daemon",
+    "python3 .course-kit/v1/tools/check_practice.py PR05 --submission ."
+  ],
+  "tests": [
+    {
+      "name": "colcon test: 30 tests, 0 errors, 0 failures, 2 skipped",
+      "status": "passed",
+      "evidence": "tests.txt"
+    },
+    {
+      "name": "reliable-подписчик несовместим с best effort издателем sensor_pose",
+      "status": "passed",
+      "evidence": "tests.txt"
+    },
+    {
+      "name": "Launch завершается по SIGINT: процессы уходят, при record:=false каталог bag не создаётся",
+      "status": "passed",
+      "evidence": "tests.txt"
+    },
+    {
+      "name": "В /robot_a топик виден, reliable echo завершился с кодом 124 без сообщения",
+      "status": "passed",
+      "evidence": "qos-before.txt"
+    },
+    {
+      "name": "best_effort echo на живом потоке вернул позу и код 0, команда patrol идёт в /turtle1/cmd_vel",
+      "status": "passed",
+      "evidence": "qos-after.txt"
+    },
+    {
+      "name": "Один MCAP содержит только /robot_a/sensor_pose: 1642 сообщения",
+      "status": "passed",
+      "evidence": "qos-after.txt, bag-metadata.yaml"
+    },
+    {
+      "name": "Повтор той же записи: best_effort доставил позу, reliable снова получил отказ RELIABILITY",
+      "status": "passed",
+      "evidence": "qos-after.txt"
+    }
+  ],
+  "defect": {
+    "reproducer": "ros2 launch course_bringup patrol.launch.py namespace:=robot_a subscriber_reliability:=reliable record:=false. ros2 topic list показал /robot_a/sensor_pose. ros2 topic info --verbose: издатель pose_relay в /robot_a с Reliability BEST_EFFORT, подписчик pose_subscriber с Reliability RELIABLE. ros2 param get /robot_a/pose_subscriber reliability напечатал String value is: reliable. timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability reliable --once завершился с echo_exit=124. В выводе: New publisher discovered on topic '/robot_a/sensor_pose', offering incompatible QoS. No messages will be received from it. Last incompatible policy: RELIABILITY. Сообщения позы не было. Каталог evidence/pr05/bag не создался.",
+    "root_cause": "Имя топика совпало, политики надёжности нет. pose_relay публикует sensor_pose как best effort, volatile, keep_last 10. Подписчик с reliable не может принять такой поток: издатель best effort не обслуживает запрос reliable. Поэтому топик есть в ros2 topic list, а сообщения не доходят. То же предупреждение написали обе стороны: relay не отправляет подписчику, подписчик не принимает издателя. Последняя несовместимая политика — RELIABILITY.",
+    "proof_after": "Тот же launch с subscriber_reliability:=best_effort и record:=true. ros2 param get стал String value is: best_effort. У /robot_a/sensor_pose издатель, pose_subscriber и rosbag2_recorder все BEST_EFFORT. timeout 3s ros2 topic echo --qos-reliability best_effort --once завершился с echo_exit=0 и позой x=7.206765651702881, y=7.245136260986328, linear_velocity=0.5, angular_velocity=0.30000001192092896. ros2 topic info /turtle1/cmd_vel показал издателя patrol в /robot_a и подписчика turtlesim в /. ros2 bag info: Storage id mcap, один топик /robot_a/sensor_pose, Count 1642, длительность 26.575695517s. Повтор этой же записи с config/qos-overrides.yaml: best_effort echo вернул код 0 и позу x=7.117185115814209, y=6.671041488647461; reliable echo снова завершился с кодом 124 и Last incompatible policy: RELIABILITY."
+  },
+  "claims": {
+    "public_tests_passed": true,
+    "defect_reproduced": true,
+    "defect_fixed": true,
+    "replay_verified": true
+  },
+  "time": {
+    "contact_academic_hours": 2,
+    "self_study_hours": 2
+  },
+  "time_note": "Оценка из условия: одна лабораторная пара и около двух часов самостоятельной доработки.",
+  "ai_used": true,
+  "recorded_at_utc": "2026-10-16T06:27:30+00:00"
+}
