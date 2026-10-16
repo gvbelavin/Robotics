@@ -1,6 +1,6 @@
 """Выбор команды скорости по последней сохранённой позе."""
 
-MAX_LINEAR_X = 0.5
+MAX_LINEAR_X = 1.0
 MAX_ANGULAR_Z = 1.0
 
 
@@ -8,7 +8,7 @@ def command_from_pose(pose, linear_x=0.5, angular_z=0.3):
     """
     Вернуть linear.x и angular.z либо нули, если позы ещё нет.
 
-    Запрошенные скорости ограничиваются: linear.x входит в [0, 0.5],
+    Запрошенные скорости ограничиваются: linear.x входит в [0, 1],
     angular.z входит в [-1, 1].
     """
     if pose is None:

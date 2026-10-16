@@ -15,5 +15,5 @@ def test_pose_message_selects_forward_and_turn():
 
 def test_command_is_limited():
     pose = SimpleNamespace(x=1.0, y=2.0, theta=0.4)
-    assert command_from_pose(pose, linear_x=2.0, angular_z=3.0) == (0.5, 1.0)
+    assert command_from_pose(pose, linear_x=2.0, angular_z=3.0) == (1.0, 1.0)
     assert command_from_pose(pose, linear_x=-0.2, angular_z=-4.0) == (0.0, -1.0)

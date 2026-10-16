@@ -49,3 +49,22 @@ ros2 run patrol patrol --ros-args -r cmd_vel:=/turtle1/cmd_vel
 ```
 
 Наблюдения лежат в `evidence/pr03/`.
+
+## ПР04. Параметры движения
+
+Та же нода `patrol`. Скорость, поворот и частота — параметры `linear_speed`, `turn_rate` и `publish_hz`.
+
+```bash
+source /opt/ros/lyrical/setup.bash
+colcon build --symlink-install --packages-select patrol
+source install/setup.bash
+export ROS_DOMAIN_ID=16
+export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+python3 -m pytest src/patrol/test
+ros2 launch turtle_bringup sim.launch.py
+ros2 run patrol patrol --ros-args -r cmd_vel:=/turtle1/cmd_vel
+ros2 param set /patrol publish_hz 5.0
+ros2 param set /patrol publish_hz 0.0
+```
+
+Ноль и другие значения вне 1–30 Гц отклоняются до пересоздания таймера. Наблюдения лежат в `evidence/pr04/`.
