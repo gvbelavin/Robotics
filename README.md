@@ -68,3 +68,27 @@ ros2 param set /patrol publish_hz 0.0
 ```
 
 Ноль и другие значения вне 1–30 Гц отклоняются до пересоздания таймера. Наблюдения лежат в `evidence/pr04/`.
+
+## ПР05. Launch, QoS и повтор записи
+
+Пакет `course_bringup` поднимает turtlesim, `patrol` и relay позы одной командой. Имена внутри нод относительные: `turtle1/pose`, `cmd_vel`, `sensor_pose`. Launch помещает patrol и relay в `namespace` и переназначает команду и позу на глобальную черепаху. `sensor_pose` издаётся с best effort. Подписчик берёт `subscriber_reliability`. Запись MCAP стартует только при `record:=true`.
+
+```bash
+source /opt/ros/lyrical/setup.bash
+colcon build --symlink-install --packages-select patrol course_bringup
+source install/setup.bash
+export ROS_DOMAIN_ID=16
+export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+python3 -m pytest src/course_bringup/test/test_qos.py src/course_bringup/test/test_launch_description.py
+ros2 launch course_bringup patrol.launch.py \
+  namespace:=robot_a subscriber_reliability:=best_effort record:=false
+```
+
+Повтор записи:
+
+```bash
+ros2 bag play evidence/pr05/bag \
+  --qos-profile-overrides-path config/qos-overrides.yaml
+```
+
+Наблюдения лежат в `evidence/pr05/`.

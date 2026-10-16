@@ -1,0 +1,63 @@
+name: PR05 — launch, QoS и запись
+
+on: [push, pull_request]
+
+jobs:
+  bringup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: osrf/ros:jazzy-desktop-full@sha256:d16957210572c5f919f3f9bd2fb0cc24a82542647489d8b8eda7c3beda31305f
+    env:
+      COURSE_KIT_URL: https://ros.lms.ci.nsu.ru/downloads/robotics-course-kit-v1-w06-6eda53e1c566.tar.gz
+      COURSE_KIT_SHA256: 6eda53e1c566f7f0a7e09d7afe1e5a6f3b98397175a7e57dede9a84c6d14d0fe
+    steps:
+      - name: Prepare Node for checkout
+        shell: bash
+        run: |
+          test "$(uname -m)" = x86_64
+          apt-get update
+          apt-get install -y --no-install-recommends ca-certificates curl xz-utils
+          curl -fsSLo /tmp/node.tar.xz https://nodejs.org/dist/v22.19.0/node-v22.19.0-linux-x64.tar.xz
+          printf '%s  %s\n' c0649af18e6a24f6fe5535a3e86b341dd49a8e71117c8b68bde973ef834f16f2 /tmp/node.tar.xz | sha256sum -c -
+          tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1
+          node --version
+      - name: Получить всю историю коммитов
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Собрать пакеты и прогнать проверки QoS и launch
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          colcon build --symlink-install --packages-select patrol course_bringup
+          source install/setup.bash
+          python3 -m pytest \
+            src/patrol/test/test_command.py \
+            src/patrol/test/test_parameters.py \
+            src/course_bringup/test/test_qos.py \
+            src/course_bringup/test/test_launch_description.py
+      - name: Скачать зафиксированный комплект курса
+        shell: bash
+        run: |
+          curl -fsSLo course-kit.tar.gz "$COURSE_KIT_URL"
+          printf '%s  %s\n' "$COURSE_KIT_SHA256" course-kit.tar.gz | sha256sum -c -
+          mkdir -p .course-kit
+          tar -xzf course-kit.tar.gz -C .course-kit
+      - name: Проверить JSON и совпадение версии архива
+        shell: bash
+        run: |
+          python3 -m json.tool evidence/pr05/report.json > /dev/null
+          python3 - <<'PYTHON'
+          import json
+          import os
+          from pathlib import Path
+          report = json.loads(Path('evidence/pr05/report.json').read_text())
+          if report['course_kit']['archive_sha256'] != os.environ['COURSE_KIT_SHA256']:
+              raise SystemExit('SHA-256 комплекта в отчёте отличается от архива CI')
+          if report['course_kit']['version'] != 'v1-w06':
+              raise SystemExit('версия course kit в отчёте отличается от v1-w06')
+          PYTHON
+      - name: Проверить комплектность evidence и коммит реализации
+        shell: bash
+        run: python3 .course-kit/v1/tools/check_practice.py PR05 --submission .

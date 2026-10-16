@@ -38,7 +38,7 @@ class Patrol(Node):
         self._apply(linear_speed, turn_rate, publish_hz)
         pose_type = pose_message_type()
         self.pose_sub = self.create_subscription(
-            pose_type, '/turtle1/pose', self.on_pose, 10)
+            pose_type, 'turtle1/pose', self.on_pose, 10)
         self.cmd_pub = self.create_publisher(Twist, 'cmd_vel', 10)
         self.add_on_set_parameters_callback(self.on_set_parameters)
 
