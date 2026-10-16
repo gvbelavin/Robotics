@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "practice_id": "PR04",
+  "commit": "b1d7f8d1f7983b93cce2dafaa90a02691dc51de7",
+  "course_kit": {
+    "version": "v1-w06",
+    "archive_sha256": "6eda53e1c566f7f0a7e09d7afe1e5a6f3b98397175a7e57dede9a84c6d14d0fe"
+  },
+  "commands": [
+    "colcon build --symlink-install --packages-select patrol",
+    "source install/setup.bash",
+    "python3 -m pytest src/patrol/test",
+    "export ROS_DOMAIN_ID=16",
+    "export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST",
+    "ros2 launch turtle_bringup sim.launch.py",
+    "ros2 topic type /turtle1/pose --no-daemon --spin-time 2",
+    "ros2 run patrol patrol --ros-args -r cmd_vel:=/turtle1/cmd_vel",
+    "ros2 param list /patrol --no-daemon --spin-time 2",
+    "ros2 param get /patrol linear_speed --no-daemon --spin-time 2",
+    "ros2 param get /patrol turn_rate --no-daemon --spin-time 2",
+    "ros2 param get /patrol publish_hz --no-daemon --spin-time 2",
+    "timeout --signal=INT 10s ros2 topic hz /turtle1/cmd_vel --qos-reliability reliable --spin-time 1",
+    "ros2 param set /patrol publish_hz 5.0 --no-daemon --spin-time 2",
+    "ros2 param set /patrol linear_speed 0.8 --no-daemon --spin-time 2",
+    "ros2 param set /patrol turn_rate 0.6 --no-daemon --spin-time 2",
+    "ros2 param set /patrol linear_speed 2.0 --no-daemon --spin-time 2",
+    "ros2 param set /patrol publish_hz 0.0 --no-daemon --spin-time 2 --service-timeout 5",
+    "ros2 param set /patrol publish_hz -1.0 --no-daemon --spin-time 2 --service-timeout 5",
+    "ros2 node list --no-daemon --spin-time 2",
+    "ros2 service type /clear",
+    "ros2 service call /clear std_srvs/srv/Empty \"{}\" --timeout 5",
+    "ros2 action list -t",
+    "ros2 action info /turtle1/rotate_absolute",
+    "ros2 interface show turtlesim_msgs/action/RotateAbsolute",
+    "python3 .course-kit/v1/tools/check_practice.py PR04 --submission ."
+  ],
+  "tests": [
+    {
+      "name": "pytest src/patrol/test: 16 passed, 1 skipped",
+      "status": "passed",
+      "evidence": "tests.txt"
+    },
+    {
+      "name": "Чистая проверка принимает 10→5 Гц и отклоняет 0, отрицательное значение, NaN и inf",
+      "status": "passed",
+      "evidence": "tests.txt"
+    },
+    {
+      "name": "Отказ 0, −2 и NaN сохраняет тот же объект таймера и publish_hz 10; смена на 5 Гц оставляет один таймер",
+      "status": "passed",
+      "evidence": "tests.txt"
+    },
+    {
+      "name": "Старт с publish_hz 0 не создаёт таймер",
+      "status": "passed",
+      "evidence": "tests.txt"
+    },
+    {
+      "name": "Живая смена 10→5 Гц: average rate 10.000 окно 79, затем 5.000 окно 39",
+      "status": "passed",
+      "evidence": "hz.txt, parameters.md"
+    },
+    {
+      "name": "linear_speed 0.8 и turn_rate 0.6 видны в позе; 2.0 отклонено, параметр остался 0.8",
+      "status": "passed",
+      "evidence": "params-live.txt, parameters.md"
+    },
+    {
+      "name": "Без проверки частоты publish_hz 0.0 даёт ZeroDivisionError, клиент ждёт 5 с, в графе остаётся turtlesim",
+      "status": "passed",
+      "evidence": "unchecked.txt, defect.txt"
+    },
+    {
+      "name": "С проверкой тот же set 0.0 отклонён, param get остаётся 10.0, поток 10.000 Гц, окно 79",
+      "status": "passed",
+      "evidence": "hz.txt, parameters.md"
+    },
+    {
+      "name": "/clear вернул пустой ответ и не изменил позу; /turtle1/rotate_absolute имеет тип turtlesim_msgs/action/RotateAbsolute",
+      "status": "passed",
+      "evidence": "clear-action.txt, parameters.md"
+    }
+  ],
+  "defect": {
+    "reproducer": "Проверка диапазона временно не применялась к publish_hz. При запущенных turtlesim и patrol команда ros2 param set /patrol publish_hz 0.0 --no-daemon --spin-time 2 --service-timeout 5 завершилась кодом 1: Timed out waiting for set_parameters response from node /patrol (timeout: 5.0s). В stderr ноды — ZeroDivisionError: division by zero на строке period = 1.0 / self.publish_hz, затем Process exited with failure 1. ros2 node list --no-daemon --spin-time 2 показал только /turtlesim.",
+    "root_cause": "Ноль дошёл до пересоздания таймера. Деление 1/publish_hz выполнилось внутри callback службы параметров и вышло из rclpy.spin. Ответ клиенту не сформировался, процесс patrol завершился, поток Twist прекратился вместе с ним.",
+    "proof_after": "Та же команда на ноде с возвращённой проверкой сразу напечатала Setting parameter failed: publish_hz вне диапазона [1.0, 30.0] и код 0. ros2 param get /patrol publish_hz остался Double value is: 10.0. Следующие 10 секунд ros2 topic hz /turtle1/cmd_vel дали average rate 10.000, min 0.099s, max 0.101s, окно 79 — как до отказа. Отрицательное −1.0 отклонено той же формулировкой, get снова 10.0."
+  },
+  "claims": {
+    "public_tests_passed": true,
+    "defect_reproduced": true,
+    "defect_fixed": true
+  },
+  "time": {
+    "contact_academic_hours": 2,
+    "self_study_hours": 2
+  },
+  "time_note": "Оценка из условия: одна лабораторная пара и около двух часов самостоятельной доработки.",
+  "ai_used": true,
+  "recorded_at_utc": "2026-10-16T05:52:33+00:00"
+}

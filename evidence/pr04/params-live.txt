@@ -1,0 +1,78 @@
+=== param list ===
+
+$ ros2 param list /patrol --no-daemon --spin-time 2
+  # 2026-10-16T05:45:57.762545670Z
+  linear_speed
+  publish_hz
+  start_type_description_service
+  turn_rate
+  use_sim_time
+  # exit 0 2026-10-16T05:46:02.739182658Z
+=== defaults ===
+
+$ ros2 param get /patrol linear_speed --no-daemon --spin-time 2
+  # 2026-10-16T05:46:02.747686534Z
+Double value is: 0.5
+  # exit 0 2026-10-16T05:46:07.733187360Z
+
+$ ros2 param get /patrol turn_rate --no-daemon --spin-time 2
+  # 2026-10-16T05:46:07.740515864Z
+Double value is: 0.3
+  # exit 0 2026-10-16T05:46:13.210118731Z
+
+$ ros2 param get /patrol publish_hz --no-daemon --spin-time 2
+  # 2026-10-16T05:46:13.217084487Z
+Double value is: 10.0
+  # exit 0 2026-10-16T05:46:18.514194088Z
+=== hz at 10 ===
+
+$ timeout --signal=INT 10s ros2 topic hz /turtle1/cmd_vel --qos-reliability reliable --spin-time 1 --no-daemon
+  # 2026-10-16T05:46:18.521835705Z
+  # exit 2 2026-10-16T05:46:19.239824629Z
+=== set 5.0 ===
+
+$ ros2 param set /patrol publish_hz 5.0 --no-daemon --spin-time 2
+  # 2026-10-16T05:46:19.247320720Z
+Set parameter successful
+  # exit 0 2026-10-16T05:46:25.161790262Z
+
+$ ros2 param get /patrol publish_hz --no-daemon --spin-time 2
+  # 2026-10-16T05:46:25.168419778Z
+Double value is: 5.0
+  # exit 0 2026-10-16T05:46:31.15932346Z
+=== hz at 5 ===
+
+$ timeout --signal=INT 10s ros2 topic hz /turtle1/cmd_vel --qos-reliability reliable --spin-time 1 --no-daemon
+  # 2026-10-16T05:46:31.25057396Z
+  # exit 2 2026-10-16T05:46:31.843921662Z
+=== speeds ===
+
+$ ros2 param set /patrol linear_speed 0.8 --no-daemon --spin-time 2
+  # 2026-10-16T05:46:31.851219524Z
+Set parameter successful
+  # exit 0 2026-10-16T05:46:37.37350951Z
+
+$ ros2 param set /patrol turn_rate 0.6 --no-daemon --spin-time 2
+  # 2026-10-16T05:46:37.46617574Z
+Set parameter successful
+  # exit 0 2026-10-16T05:46:43.186423473Z
+
+$ ros2 topic echo /turtle1/pose --once --no-daemon --spin-time 2
+  # 2026-10-16T05:46:43.701896950Z
+x: 7.4605841636657715
+y: 8.755001068115234
+theta: 3.096029281616211
+linear_velocity: 0.800000011920929
+angular_velocity: 0.6000000238418579
+---
+  # exit 0 2026-10-16T05:46:46.581076310Z
+=== reject linear 2 ===
+
+$ ros2 param set /patrol linear_speed 2.0 --no-daemon --spin-time 2
+  # 2026-10-16T05:46:46.588863232Z
+  # exit 0 2026-10-16T05:46:52.53071561Z
+
+$ ros2 param get /patrol linear_speed --no-daemon --spin-time 2
+  # 2026-10-16T05:46:52.61503793Z
+Double value is: 0.8
+  # exit 0 2026-10-16T05:46:58.23572154Z

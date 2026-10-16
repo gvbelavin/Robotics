@@ -25,3 +25,12 @@
 - Затронутые компоненты: пакет `src/patrol`, `.github/workflows/pr03.yml`, `README.md`, `evidence/pr03/`, этот файл
 - Характер помощи: нода с подпиской, таймером и чистой функцией команды, тесты, workflow и черновик `demo.md` с `report.json` по выводу локального запуска
 - Проверка: `colcon build` и `python3 -m pytest src/patrol/test` выполнены локально в ROS 2 Lyrical. Позы, `ros2 topic info`, частота `ros2 topic hz` и остановка по SIGINT сняты с запущенных turtlesim и patrol в домене 16 и лежат в `evidence/pr03`. Числа в отчёте не подставлены вместо симулятора.
+
+## PR04
+
+- Использован ИИ: да
+- Модель: Grok 4.7
+- Инструмент: Cursor
+- Затронутые компоненты: параметры ноды `src/patrol`, `src/patrol/test/test_parameters.py`, `.github/workflows/pr04.yml`, `README.md`, `evidence/pr04/`, этот файл
+- Характер помощи: чистая проверка трёх параметров, смена одного таймера, тесты отказа, workflow и черновик `parameters.md` с `report.json` по выводу локального запуска
+- Проверка: `colcon build` и `python3 -m pytest src/patrol/test` выполнены локально в ROS 2 Lyrical, 16 passed, 1 skipped. Частоты `ros2 topic hz`, отказ `publish_hz 0.0`, traceback `ZeroDivisionError`, поза, `/clear` и `ros2 action list -t` сняты с turtlesim и patrol в домене 16 и лежат в `evidence/pr04`. Числа в отчёте не подставлены вместо симулятора.

@@ -1,0 +1,16 @@
+=== unchecked set 0 ===
+
+$ ros2 param get /patrol publish_hz --no-daemon --spin-time 2
+  # 2026-10-16T05:47:00.629398918Z
+Double value is: 10.0
+  # exit 0 2026-10-16T05:47:05.578514923Z
+
+$ ros2 param set /patrol publish_hz 0.0 --no-daemon --spin-time 2 --service-timeout 5
+  # 2026-10-16T05:47:05.585883897Z
+  # exit 1 2026-10-16T05:47:15.469080243Z
+=== nodes after crash ===
+
+$ ros2 node list --no-daemon --spin-time 2
+  # 2026-10-16T05:47:16.483528273Z
+/turtlesim
+  # exit 0 2026-10-16T05:47:19.670091111Z
