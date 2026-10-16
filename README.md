@@ -28,3 +28,24 @@ ros2 topic pub --once /turtle1/cmd_vel geometry_msgs/msg/Twist \
 ```
 
 `Ctrl+C` в терминале launch завершает turtlesim, который он запустил. Наблюдения лежат в `evidence/pr02/`.
+
+## ПР03. Нода patrol: поза и команда
+
+Пакет `turtle_bringup` остаётся. Рядом — `src/patrol`, команда `patrol`.
+
+```bash
+source /opt/ros/lyrical/setup.bash
+colcon build --symlink-install --packages-select patrol
+source install/setup.bash
+export ROS_DOMAIN_ID=16
+python3 -m pytest src/patrol/test
+```
+
+В одном терминале симулятор, в другом нода. Без remap издатель пишет в относительный `cmd_vel` (`/cmd_vel`) и не соединён с `/turtle1/cmd_vel`. Связь исправляет запуск:
+
+```bash
+ros2 launch turtle_bringup sim.launch.py
+ros2 run patrol patrol --ros-args -r cmd_vel:=/turtle1/cmd_vel
+```
+
+Наблюдения лежат в `evidence/pr03/`.
