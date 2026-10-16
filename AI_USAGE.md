@@ -16,3 +16,12 @@
 - Затронутые компоненты: пакет `src/turtle_bringup`, `.github/workflows/pr02.yml`, `README.md`, `evidence/pr02/`, этот файл
 - Характер помощи: создание пакета и launch-файла, настройка CI, запуск команд сборки и turtlesim, черновик `commands.md`, `types.md` и `report.json` по выводу этих команд
 - Проверка: `colcon build` и `ros2 launch` выполнены локально в ROS 2 Lyrical, домен 16. Позы, `ros2 topic info` и код завершения launch взяты из этого запуска и лежат в `evidence/pr02`. Числа в отчёте не подставлены вместо симулятора. `python3 -m py_compile` для launch-файла завершился успешно.
+
+## PR03
+
+- Использован ИИ: да
+- Модель: Grok 4.7
+- Инструмент: Cursor
+- Затронутые компоненты: пакет `src/patrol`, `.github/workflows/pr03.yml`, `README.md`, `evidence/pr03/`, этот файл
+- Характер помощи: нода с подпиской, таймером и чистой функцией команды, тесты, workflow и черновик `demo.md` с `report.json` по выводу локального запуска
+- Проверка: `colcon build` и `python3 -m pytest src/patrol/test` выполнены локально в ROS 2 Lyrical. Позы, `ros2 topic info`, частота `ros2 topic hz` и остановка по SIGINT сняты с запущенных turtlesim и patrol в домене 16 и лежат в `evidence/pr03`. Числа в отчёте не подставлены вместо симулятора.

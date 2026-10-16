@@ -1,0 +1,18 @@
+HZ_START 2026-10-16T05:22:05.322527568Z
+average rate: 9.996
+	min: 0.099s max: 0.101s std dev: 0.00052s window: 9
+average rate: 9.996
+	min: 0.099s max: 0.101s std dev: 0.00043s window: 19
+average rate: 9.999
+	min: 0.099s max: 0.101s std dev: 0.00039s window: 29
+average rate: 10.000
+	min: 0.099s max: 0.101s std dev: 0.00036s window: 39
+average rate: 10.000
+	min: 0.099s max: 0.101s std dev: 0.00040s window: 49
+average rate: 9.999
+	min: 0.099s max: 0.101s std dev: 0.00039s window: 59
+average rate: 9.999
+	min: 0.099s max: 0.101s std dev: 0.00038s window: 69
+average rate: 9.998
+	min: 0.099s max: 0.101s std dev: 0.00040s window: 79
+HZ_END 2026-10-16T05:22:16.468766147Z

@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "practice_id": "PR03",
+  "commit": "0c40e91e173bdb0e5a139287555ef6a1baf3f048",
+  "course_kit": {
+    "version": "v1-w06",
+    "archive_sha256": "6eda53e1c566f7f0a7e09d7afe1e5a6f3b98397175a7e57dede9a84c6d14d0fe"
+  },
+  "commands": [
+    "ros2 pkg create --build-type ament_python --license Apache-2.0 --node-name patrol patrol --dependencies rclpy geometry_msgs",
+    "colcon build --symlink-install --packages-select patrol",
+    "source install/setup.bash",
+    "python3 -m pytest src/patrol/test",
+    "export ROS_DOMAIN_ID=16",
+    "ros2 launch turtle_bringup sim.launch.py",
+    "ros2 topic type /turtle1/pose --no-daemon --spin-time 2",
+    "ros2 topic echo /turtle1/pose --once --no-daemon --spin-time 2",
+    "ros2 run patrol patrol",
+    "ros2 node info /patrol --no-daemon --spin-time 2",
+    "ros2 topic info /cmd_vel --verbose --no-daemon --spin-time 2",
+    "ros2 topic info /turtle1/cmd_vel --verbose --no-daemon --spin-time 2",
+    "ros2 run patrol patrol --ros-args -r cmd_vel:=/turtle1/cmd_vel",
+    "timeout --signal=INT 10s ros2 topic hz /turtle1/cmd_vel --qos-reliability reliable --spin-time 1",
+    "python3 .course-kit/v1/tools/check_practice.py PR03 --submission ."
+  ],
+  "tests": [
+    {
+      "name": "pytest src/patrol/test: 7 passed, 1 skipped",
+      "status": "passed",
+      "evidence": "tests.txt"
+    },
+    {
+      "name": "Нет позы — нулевая команда; обычная поза — linear.x 0.5 и angular.z 0.3; лишняя скорость ограничивается",
+      "status": "passed",
+      "evidence": "tests.txt"
+    },
+    {
+      "name": "Сборка patrol завершилась одной пакетой",
+      "status": "passed",
+      "evidence": "build.txt"
+    },
+    {
+      "name": "Без remap издатель пишет в /cmd_vel, подписчиков 0, поза осталась x=5.544444561004639, скорости 0",
+      "status": "passed",
+      "evidence": "info-cmd-vel-broken.txt, info-turtle-cmd-broken.txt, pose-during-broken.txt"
+    },
+    {
+      "name": "Remap cmd_vel:=/turtle1/cmd_vel соединил patrol с turtlesim: linear_velocity=0.5, angular_velocity=0.3",
+      "status": "passed",
+      "evidence": "node-info-fixed.txt, info-cmd-vel-fixed.txt, info-turtle-cmd-fixed.txt, pose-during-fixed.txt"
+    },
+    {
+      "name": "Частота /turtle1/cmd_vel за 10 секунд: 9.998 Гц, окно 79",
+      "status": "passed",
+      "evidence": "cmd-hz.txt"
+    },
+    {
+      "name": "После SIGINT patrol черепаха остановилась без нулевого Twist, turtlesim ещё был в графе и вышел только от SIGINT launch",
+      "status": "passed",
+      "evidence": "pose-stop-timeline.txt, nodes-after-patrol-stop.txt, nodes-after-final-stop.txt, launch.txt"
+    }
+  ],
+  "defect": {
+    "reproducer": "При запущенном turtlesim ros2 run patrol patrol публиковал Twist в относительный cmd_vel. ros2 topic info /cmd_vel --verbose показал Publisher count 1 (patrol) и Subscription count 0. У /turtle1/cmd_vel подписчик был turtlesim, издателя patrol не было. Поза осталась x=5.544444561004639, y=5.544444561004639, theta=0.0, linear_velocity=0.0, angular_velocity=0.0.",
+    "root_cause": "Тип geometry_msgs/msg/Twist совпал, но доставка идёт по полному имени топика. Относительное cmd_vel в корневом пространстве имён становится /cmd_vel. turtlesim подписан на /turtle1/cmd_vel. Сообщения patrol в графе были и до ноды симулятора не доходили.",
+    "proof_after": "Тот же процесс запущен с --ros-args -r cmd_vel:=/turtle1/cmd_vel. Код, скорости 0.5 и 0.3 и ROS_DOMAIN_ID=16 не менялись. /cmd_vel исчез (Unknown topic). node info показывает издателя /turtle1/cmd_vel, подписчик — turtlesim. Поза стала с linear_velocity=0.5 и angular_velocity=0.30000001192092896, координаты ушли от старта. timeout 10s ros2 topic hz дал average rate 9.998, окно 79, min 0.099s, max 0.101s."
+  },
+  "claims": {
+    "public_tests_passed": true,
+    "defect_reproduced": true,
+    "defect_fixed": true
+  },
+  "time": {
+    "contact_academic_hours": 2,
+    "self_study_hours": 2
+  },
+  "time_note": "Оценка из условия: одна лабораторная пара и около двух часов самостоятельной доработки.",
+  "ai_used": true,
+  "recorded_at_utc": "2026-10-16T05:24:51+00:00"
+}

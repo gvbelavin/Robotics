@@ -1,0 +1,9 @@
+A message was lost!!!
+	total count change:7
+	total count: 7---
+x: 4.24238395690918
+y: 8.256488800048828
+theta: -2.251185417175293
+linear_velocity: 0.5
+angular_velocity: 0.30000001192092896
+---

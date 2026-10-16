@@ -1,0 +1,10 @@
+[INFO] [launch]: All log files can be found below /home/gleb/.ros/log/2026-10-16-12-21-18-735897-gleb-MCLG-XX-143994
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [turtlesim_node-1]: process started with pid [144018]
+[turtlesim_node-1] [INFO] [1792128079.042416188] [turtlesim]: Starting turtlesim with node name /turtlesim
+[turtlesim_node-1] [INFO] [1792128079.049449603] [turtlesim]: Spawning turtle [turtle1] at x=[5.544445], y=[5.544445], theta=[0.000000]
+[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+[INFO] [turtlesim_node-1]: sending signal 'SIGINT' to process[turtlesim_node-1]
+[turtlesim_node-1] [INFO] [1792128146.607756395] [rclcpp]: signal_handler(signum=2)
+[turtlesim_node-1] [INFO] [1792128146.610410649] [rclcpp]: signal_handler(signum=2)
+[INFO] [turtlesim_node-1]: process has finished cleanly [pid 144018]
